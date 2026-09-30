@@ -1,15 +1,241 @@
-# projectdiscovery/nuclei-action
+<h1 align="center">
+  <img src="https://github.com/projectdiscovery/nuclei/blob/main/static/nuclei-logo.png" alt="nuclei" width="200px"></a>
+  <br>
+</h1>
 
-Nuclei is a fast and customisable vulnerability scanner based on simple YAML based DSL
+This Nuclei Action makes it easy to orchestrate [Nuclei](https://github.com/projectdiscovery/nuclei) with [GitHub Action](https://github.com/features/actions).
+Integrate all of your [Nuclei Templates](https://github.com/projectdiscovery/nuclei-templates) into powerful continuous security workflows and make it part of your secure software development life cycle.
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/projectdiscovery/nuclei-action](https://github.com/projectdiscovery/nuclei-action).
+> [!WARNING]
+> #### Deprecation Notice
+> The `v2*` references are deprecated and (`main`) will be unsupported (replaced by `v3`) on **1 March 2026**.
+> Please update workflows to use `projectdiscovery/nuclei-action@v3`.
 
-## Versions
+## Inputs
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v2.0.2 | [`v2.0.2`](https://github.com/chainguard-actions/projectdiscovery-nuclei-action/tree/v2.0.2) | [`128f728`](https://github.com/projectdiscovery/nuclei-action/commit/128f7284c2a836b485e292b9080dbc6175103758) |
+| name | description | required | default |
+| --- | --- | --- | --- |
+| `version` | <p>Setup with specific version ("latest" or in format "vX.Y.Z").</p> | `true` | `latest` |
+| `install-only` | <p>Install Nuclei without running scans.</p> | `false` | `false` |
+| `args` | <p>Arguments to pass to Nuclei.</p> | `false` | `""` |
+| `config` | <p>Nuclei configuration file content.</p> | `false` | `""` |
+| `config-path` | <p>Path to Nuclei configuration file.</p> | `false` | `""` |
+| `cache` | <p>Enable caching of Nuclei caches, configs, templates, and browser.</p> | `false` | `true` |
+| `token` | <p>GitHub Token. It is used to fetch Nuclei releases from GitHub.</p> | `true` | `${{ github.token }}` |
 
+> [!IMPORTANT]
+> * `config` and `config-path` **must not** be set together.
+> * `args` **always take precedence** over `config` or `config-path`.
+
+> [!NOTE]
+> When [debug logging](https://docs.github.com/en/actions/how-tos/monitor-workflows/enable-debug-logging) is enabled, this action automatically adds `-debug` and `-verbose` flags to Nuclei.
+
+## Outputs
+
+| name | description |
+| --- | --- |
+| `stdout` | <p>The standard output from running Nuclei</p> |
+| `stderr` | <p>The standard error from running Nuclei</p> |
+
+## Runs
+
+This action is a `node24` action.
+
+## Usage
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version:
+    # Setup with specific version ("latest" or in format "vX.Y.Z").
+    #
+    # Required: true
+    # Default: latest
+
+    install-only:
+    # Install Nuclei without running scans.
+    #
+    # Required: false
+    # Default: false
+
+    args:
+    # Arguments to pass to Nuclei.
+    #
+    # Required: false
+    # Default: ""
+
+    config:
+    # Nuclei configuration file content.
+    #
+    # Required: false
+    # Default: ""
+
+    config-path:
+    # Path to Nuclei configuration file.
+    #
+    # Required: false
+    # Default: ""
+
+    cache:
+    # Enable caching of Nuclei caches, configs, templates, and browser.
+    #
+    # Required: false
+    # Default: true
+
+    token:
+    # GitHub Token. It is used to fetch Nuclei releases from GitHub.
+    #
+    # Required: true
+    # Default: ${{ github.token }}
+```
+
+### Example
+
+**Default setup (latest Nuclei)**
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    args: -u http://scanme.sh
+```
+
+**Setup with specific version**
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version: v3.6.0
+    args: -u http://scanme.sh
+```
+
+**Setup or install Nuclei without running scans**
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version: v3.6.0
+    install-only: true
+
+- run: nuclei -version
+```
+
+or install only and without cache:
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version: v3.6.0
+    install-only: true
+    cache: false
+
+- run: nuclei -version
+```
+
+**Setup with Nuclei configuration**
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version: latest
+    config: |
+      target:
+        - http://scanme.sh
+      sarif-export: results.sarif
+```
+
+or pass it via [variables](https://docs.github.com/actions/learn-github-actions/variables):
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version: latest
+    config: ${{ vars.NUCLEI_CONFIG }}
+```
+
+or via repo-managed config file:
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version: latest
+    config-path: path/to/nuclei.yaml
+```
+
+**Setup with [GitHub code scanning](https://docs.github.com/en/code-security/concepts/code-scanning/about-code-scanning)**
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    version: latest
+    config: |
+      target:
+        - http://scanme.sh
+      sarif-export: results.sarif
+
+- uses: github/codeql-action/upload-sarif@v3
+  if: success()
+  with:
+    sarif_file: results.sarif
+    category: nuclei-results
+```
+
+**Setup with reporting**
+
+```yaml
+- uses: projectdiscovery/nuclei-action@v3
+  with:
+    args: -u http://scanme.sh
+    config: |
+      report-config: issue-tracker-config.yaml
+  env:
+    GITHUB_BASE_URL: https://localhost:8443/github
+    GITHUB_USERNAME: test-username
+    GITHUB_OWNER: test-owner
+    GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+    GITHUB_PROJECT_NAME: test-project
+```
+
+<details>
+<summary>Example <code>issue-tracker-config.yaml</code> (repository file):</summary>
+
+```yaml
+github:
+ # base-url is the optional self-hosted GitHub application url
+ base-url: $GITHUB_BASE_URL # read from environment variable
+ # username is the username of the GitHub user
+ username: $GITHUB_USERNAME # read from environment variable
+ # owner is the owner name of the repository for issues
+ owner: $GITHUB_OWNER # read from environment variable
+ # token is the token for GitHub account
+ token: $GITHUB_TOKEN # read from environment variable
+ # project-name is the name of the repository
+ project-name: $GITHUB_PROJECT_NAME # read from environment variable
+
+ # issue-label is the label of the created issue type
+ issue-label: bug
+ # allow-list sets a tracker level filter to only create issues for templates with
+ # these severity labels or tags (does not affect exporters. set those globally)
+ allow-list:
+   severity: high, critical
+   tags: network
+ # deny-list sets a tracker level filter to never create issues for templates with
+ # these severity labels or tags (does not affect exporters. set those globally)
+ deny-list:
+   severity: low
+ # duplicate-issue-check flag to enable duplicate tracking issue check.
+ duplicate-issue-check: false
+```
+
+Refer to https://github.com/projectdiscovery/nuclei/blob/dev/cmd/nuclei/issue-tracker-config.yaml.
+</details>
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](.github/CONTRIBUTING.md) for details on how to get started.
+
+## License
+
+MIT. See [LICENSE](/LICENSE) for more details.
 ## Privacy
 
 This Action contacts Chainguard's licensing server to verify authorization. Connection metadata (IP address, GitHub repository identifier, timestamp, and any metadata encoded in the auth token) is transmitted to Chainguard, Inc. even if authorization is denied in accordance with our [Privacy Notice](https://www.chainguard.dev/legal/privacy-notice)

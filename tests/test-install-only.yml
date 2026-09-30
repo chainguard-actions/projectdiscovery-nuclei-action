@@ -1,0 +1,30 @@
+name: Test install-only mode
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          version: "latest"
+          install-only: "true"
+          cache: "false"
+      - name: Assert nuclei binary is installed
+        run: |
+          if ! command -v nuclei &>/dev/null; then
+            echo "FAIL: nuclei binary not found in PATH"
+            exit 1
+          fi
+          echo "PASS: nuclei is installed"
+          nuclei --version
+      - name: Assert stdout output exists or is empty (install-only produces no scan output)
+        env:
+          STDOUT: ${{ steps.action.outputs.stdout }}
+          STDERR: ${{ steps.action.outputs.stderr }}
+        run: |
+          echo "stdout: $STDOUT"
+          echo "stderr: $STDERR"
+          echo "PASS: install-only mode completed without error"

@@ -1,0 +1,28 @@
+name: Test specific version installation
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          version: "v3.3.9"
+          install-only: "true"
+          cache: "false"
+      - name: Assert nuclei binary is installed at the correct version
+        run: |
+          if ! command -v nuclei &>/dev/null; then
+            echo "FAIL: nuclei binary not found in PATH"
+            exit 1
+          fi
+          VERSION_OUTPUT=$(nuclei --version 2>&1 || true)
+          echo "version output: $VERSION_OUTPUT"
+          if echo "$VERSION_OUTPUT" | grep -q "3.3.9"; then
+            echo "PASS: nuclei v3.3.9 is installed"
+          else
+            echo "FAIL: expected version 3.3.9 but got: $VERSION_OUTPUT"
+            exit 1
+          fi
