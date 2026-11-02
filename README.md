@@ -6,10 +6,10 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 ## Versions
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v2.0.2 | [`v2.0.2`](https://github.com/chainguard-actions/projectdiscovery-nuclei-action/tree/v2.0.2) | [`128f728`](https://github.com/projectdiscovery/nuclei-action/commit/128f7284c2a836b485e292b9080dbc6175103758) |
-| v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/projectdiscovery-nuclei-action/tree/v3.1.0) | [`32a91c0`](https://github.com/projectdiscovery/nuclei-action/commit/32a91c0da7be14c07b0ade6c14fa0f6e78d97c9c) |
+| Version | Tag | Upstream commit | Hardening report |
+|---------|-----|-----------------|------------------|
+| v2.0.2 | [`v2.0.2`](https://github.com/chainguard-actions/projectdiscovery-nuclei-action/tree/v2.0.2) | [`128f728`](https://github.com/projectdiscovery/nuclei-action/commit/128f7284c2a836b485e292b9080dbc6175103758) | [`HARDENING.md`](https://github.com/chainguard-actions/projectdiscovery-nuclei-action/blob/v2.0.2/HARDENING.md) |
+| v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/projectdiscovery-nuclei-action/tree/v3.1.0) | [`32a91c0`](https://github.com/projectdiscovery/nuclei-action/commit/32a91c0da7be14c07b0ade6c14fa0f6e78d97c9c) | [`HARDENING.md`](https://github.com/chainguard-actions/projectdiscovery-nuclei-action/blob/v3.1.0/HARDENING.md) |
 
 ## Privacy
 
